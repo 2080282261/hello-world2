@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>上传属于你自己的美</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f4f8;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        header {
+            background-color: #1e90ff;
+            color: white;
+            width: 100%;
+            padding: 1em;
+            text-align: center;
+            font-size: 1.5em;
+        }
+        main {
+            display: flex;
+            width: 80%;
+            margin-top: 2em;
+        }
+        .upload-section, .gallery-section {
+            flex: 1;
+            margin: 0 1em;
+            padding: 1em;
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .upload-section {
+            border-right: 1px solid #e0e0e0;
+        }
+        .gallery-section {
+            position: relative;
+        }
+        .drag-area {
+            border: 2px dashed #1e90ff;
+            padding: 2em;
+            text-align: center;
+            color: #999;
+            transition: border-color 0.3s ease, background-color 0.3s ease;
+        }
+        .drag-area.drag-over {
+            border-color: #00aaff;
+            background-color: #e0f7ff;
+        }
+        .gallery {
+            display: flex;
+            flex-wrap: wrap;
+        }
+        .thumbnail {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            margin: 10px;
+            border: 1px solid #e0e0e0;
+            background-size: cover;
+            background-position: center;
+        }
+        .thumbnail:hover .options {
+            display: block;
+        }
+        .options {
+            display: none;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            text-align: center;
+        }
+        .options button {
+            background: none;
+            border: none;
+            color: white;
+            padding: 0.5em;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        上传属于你自己的美
+    </header>
+    <main>
+        <div class="upload-section">
+            <div class="drag-area" id="dragArea">
+                拖拽图片到此处上传
+            </div>
+        </div>
+        <div class="gallery-section">
+            <div id="passwordPrompt">
+                <label for="password">输入密码查看图片：</label>
+                <input type="password" id="123456" />
+                <button onclick="checkPassword()">确认</button>
+            </div>
+            <div class="gallery" id="gallery" style="display:none;">
+                <!-- 缩略图将在这里显示 -->
+            </div>
+        </div>
+    </main>
+    <footer>
+        <p>联系邮箱: 2080282261@qq.com</p>
+    </footer>
+
+    <script>
+        const password = 'your_password'; // 替换为你自己的密码
+        const dragArea = document.getElementById('dragArea');
+        const gallery = document.getElementById('gallery');
+        const passwordPrompt = document.getElementById('passwordPrompt');
+
+        dragArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dragArea.classList.add('drag-over');
+        });
+
+        dragArea.addEventListener('dragleave', () => {
+            dragArea.classList.remove('drag-over');
+        });
+
+        dragArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dragArea.classList.remove('drag-over');
+            const files = e.dataTransfer.files;
+            handleFiles(files);
+        });
+
+        function handleFiles(files) {
+            for (let file of files) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    addThumbnail(e.target.result, file.name);
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function addThumbnail(src, name) {
+            const div = document.createElement('div');
+            div.classList.add('thumbnail');
+            div.style.backgroundImage = `url(${src})`;
+
+            const options = document.createElement('div');
+            options.classList.add('options');
+
+            const downloadBtn = document.createElement('button');
+            downloadBtn.innerText = '下载';
+            downloadBtn.onclick = () => downloadImage(src, name);
+
+            const deleteBtn = document.createElement('button');
+            deleteBtn.innerText = '删除';
+            deleteBtn.onclick = () => div.remove();
+
+            const renameBtn = document.createElement('button');
+            renameBtn.innerText = '重命名';
+            renameBtn.onclick = () => renameImage(name, div);
+
+            options.appendChild(downloadBtn);
+            options.appendChild(deleteBtn);
+            options.appendChild(renameBtn);
+
+            div.appendChild(options);
+            gallery.appendChild(div);
+        }
+
+        function downloadImage(src, name) {
+            const a = document.createElement('a');
+            a.href = src;
+            a.download = name;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+
+        function renameImage(name, div) {
+            const newName = prompt('输入新的名字:', name);
+            if (newName) {
+                // 实际重命名逻辑可能涉及服务器端处理，这里仅作为示例
+                alert(`图片已重命名为 ${newName}`);
+            }
+        }
+
+        function checkPassword() {
+            const input = document.getElementById('password').value;
+            if (input === password) {
+                passwordPrompt.style.display = 'none';
+                gallery.style.display = 'flex';
+            } else {
+                alert('密码错误');
+            }
+        }
+    </script>
+</body>
+</html>
